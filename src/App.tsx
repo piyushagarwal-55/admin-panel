@@ -17,8 +17,8 @@ const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Users = lazy(() => import("./pages/Users"));
 const Agenncies = lazy(() => import("./pages/Agencies"));
+const AdvancedSearch = lazy(() => import("./pages/AdvancedSearch"));
  
-
 
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -123,6 +123,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Agenncies />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/advanced-search"
+                element={
+                  <ProtectedRoute>
+                    <AdvancedSearch />
                   </ProtectedRoute>
                 }
               />
