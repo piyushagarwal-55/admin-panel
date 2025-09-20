@@ -23,6 +23,7 @@ const Agenncies = lazy(() => import("./pages/Agencies"));
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
+import CandidatesInterface from "./pages/AdvancedSearch";
 
 const queryClient = new QueryClient();
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -115,6 +116,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Settings />
+                  </ProtectedRoute>
+                }
+              />
+               <Route
+                path="/advanced-search"
+                element={
+                  <ProtectedRoute>
+                    <CandidatesInterface/>
                   </ProtectedRoute>
                 }
               />

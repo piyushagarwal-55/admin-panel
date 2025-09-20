@@ -80,6 +80,30 @@ export const employmentTypes = [
   "Temporary",
 ];
 
+export const jobStatuses = [
+  "Draft",
+  "Open", 
+  "Paused",
+  "Closed",
+  "Archived"
+] as const;
+
+export const jobPriorities = [
+  "Low",
+  "Medium", 
+  "High"
+] as const;
+
+export const workplaceTypes = [
+  "On-Site",
+  "Hybrid",
+  "Remote"
+] as const;
+
+export type JobStatus = typeof jobStatuses[number];
+export type JobPriority = typeof jobPriorities[number];
+export type WorkplaceType = typeof workplaceTypes[number];
+
 export const educationLevels = [
   "High School",
   "Associate",

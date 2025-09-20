@@ -134,7 +134,7 @@ const TemplatesManager: React.FC = () => {
             subject: template.subject || "",
             body: template.body || "",
             shareWithEveryone: template.share_with_everyone || false,
-            type: template.template_type as "email" | "sms" | "notes" | "aira",
+            type: template.template_type as "email" | "sms" | "notes" | "aira" | "activity" | "calls",
           })
         );
         console.log("Processed Templates Data:", templatesData);

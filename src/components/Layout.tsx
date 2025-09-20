@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { GlobalSearchBar } from "@/components/GlobalSearchBar";
 
 const menuItems = [
   {
@@ -170,10 +171,11 @@ export default function Layout({ children }: LayoutProps) {
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50/30 overflow-x-hidden">
         <AppSidebar />
         <main className="flex-1 flex flex-col min-w-0">
-          <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-4">
+          <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 p-4 relative z-[200]">
             <div className="flex items-center justify-between">
               <SidebarTrigger className="hover:bg-slate-100 transition-colors" />
               <div className="flex items-center gap-4">
+                <GlobalSearchBar />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button

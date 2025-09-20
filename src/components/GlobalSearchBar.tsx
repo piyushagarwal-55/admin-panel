@@ -48,7 +48,11 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ onSearch }) =>
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === "k") {
         event.preventDefault();
-        document.getElementById("global-search-input")?.focus();
+        // Only focus if we're not in an input/textarea
+        const activeElement = document.activeElement;
+        if (!activeElement || !['INPUT', 'TEXTAREA'].includes(activeElement.tagName)) {
+          document.getElementById("global-search-input")?.focus();
+        }
       }
     };
 
@@ -88,8 +92,8 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ onSearch }) =>
 
   return (
     <>
-      <div className="relative">
-        <div className="relative w-80">
+      <div className="relative z-[100]" data-global-search>
+        <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             id="global-search-input"
@@ -115,7 +119,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ onSearch }) =>
 
         {/* Search Dropdown */}
         {isDropdownOpen && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]">
             <div className="p-4">
               {searchQuery ? (
                 <div className="space-y-2">
@@ -135,7 +139,10 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ onSearch }) =>
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    navigate('/advanced-search');
+                    // Only navigate if we're not already on the advanced search page
+                    if (window.location.pathname !== '/advanced-search') {
+                      navigate('/advanced-search');
+                    }
                     setIsDropdownOpen(false);
                   }}
                   className="w-full justify-start text-blue-600 hover:text-blue-700"
@@ -151,7 +158,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({ onSearch }) =>
         {/* Click outside to close dropdown */}
         {isDropdownOpen && (
           <div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[9998]"
             onClick={() => setIsDropdownOpen(false)}
           />
         )}

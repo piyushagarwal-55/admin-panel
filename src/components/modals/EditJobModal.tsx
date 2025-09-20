@@ -60,8 +60,9 @@ export default function EditJobModal({
     salary_currency: "USD",
     company: "",
     about_company: "",
+    notice_period: "30 days",
     salary: { from: 0, to: 0, currency: "INR" },
-   employmentDetails:{experienceFrom:0,experienceTo:0},
+    employmentDetails:{experienceFrom:0,experienceTo:0},
   };
 
   const [form, setForm] = useState({ ...initialFormState });
@@ -105,6 +106,7 @@ export default function EditJobModal({
   salary_currency: job.salary_currency || "USD",
   company: job.company || "",
   about_company: job.about_company || "",
+  notice_period: job.notice_period || "30 days",
   // 👇 Make sure nested objects are always present
   salary: {
     from: job.salary_from || 0,
@@ -184,17 +186,51 @@ export default function EditJobModal({
 
   const handleSubmit = async () => {
     try {
-      console.log(form);
       setLoading(true);
-      const res = await axios.put(`${API_BASE_URL}/jobs/${jobId}`, form);
-      console.log(res);
+      
+      // Construct payload with proper field mapping
+      const payload = {
+        job_title: form.job_title,
+        job_code: form.job_code,
+        department: form.department,
+        workplace: form.workplace,
+        office_primary_location: form.office_primary_location,
+        office_on_careers_page: form.office_on_careers_page,
+        office_location_additional: form.office_location_additional,
+        description_about: form.description_about,
+        description_requirements: form.description_requirements,
+        description_benefits: form.description_benefits,
+        company_industry: form.company_industry,
+        company_job_function: form.company_job_function,
+        employment_type: form.employment_type,
+        education: form.education,
+        keywords: form.keywords,
+        salary_from: form.salary.from,
+        salary_to: form.salary.to,
+        salary_currency: form.salary.currency,
+        company: form.company,
+        about_company: form.about_company,
+        notice_period: form.notice_period || "30 days",
+        experience_from: form.employmentDetails.experienceFrom,
+        experience_to: form.employmentDetails.experienceTo,
+      };
+      
+      console.log("Sending payload:", payload);
+      
+      const res = await axios.put(`${API_BASE_URL}/jobs/${jobId}`, payload);
+      
+      console.log("Update response:", res.data);
+      
       toast.success("Job updated successfully!");
+      
+      // Close modal and trigger refresh
       onOpenChange(false);
-      setLoading(false);
       onSuccess();
     } catch (err) {
       console.error("Error on updating the job:", err);
-      toast.error("Failed to update the  job.");
+      toast.error("Failed to update the job.");
+    } finally {
+      setLoading(false);
     }
   };
 

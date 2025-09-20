@@ -28,6 +28,8 @@ import {
   initialForm,
   educationLevels,
   employmentTypes,
+  jobStatuses,
+  jobPriorities,
   industries,
   jobFunctions,
 } from "@/components/constants/jobConstants";
@@ -147,20 +149,20 @@ export default function CloneJobModal({
             keywords: job.keywords || [],
             salary_from: job.salary_from || "",
             salary_to: job.salary_to || "",
-            salary_currency: job.salary_currency || "USD",
-            status: job.status || "Draft",
+            salary_currency: job.salary_currency || "INR",
+            status: "Draft", // Always set to Draft for cloned jobs
             priority: job.priority || "Medium",
             employmentDetails: {
-              experienceFrom: job.experience_from,
-              experienceTo: job.experience_to,
+              experienceFrom: job.experience_from || 0,
+              experienceTo: job.experience_to || 0,
             },
             salary: {
-              from: job.salary_from,
-              to: job.salary_to,
-              currency: job.salary_currency,
+              from: Number(job.salary_from) || 0,
+              to: Number(job.salary_to) || 0,
+              currency: job.salary_currency || "INR",
             },
-            company: job.company,
-            about_company: job.about_company,
+            company: job.company || "",
+            about_company: job.about_company || "",
           });
         })
         .catch((err) => {
@@ -194,8 +196,8 @@ export default function CloneJobModal({
     if (!form.company_job_function.trim())
       newErrors.company_job_function = "Job function is required.";
 
-    const from = Number(form.salary_from);
-    const to = Number(form.salary_to);
+    const from = Number(form.salary.from);
+    const to = Number(form.salary.to);
 
     if (isNaN(from) || from < 0)
       newErrors.salary_from = "Salary from must be a non-negative number.";
@@ -296,6 +298,7 @@ export default function CloneJobModal({
     }
     setLoading(true);
 
+    const agencyId = localStorage.getItem('agency_id');
     //define new payload
     const payload = {
       job_title: form.job_title,
@@ -311,21 +314,23 @@ export default function CloneJobModal({
       company_industry: form.company_industry,
       company_job_function: form.company_job_function,
       employment_type: form.employment_type,
-      experience: form.experience,
+      experienceFrom: form.employmentDetails.experienceFrom,
+      experienceTo: form.employmentDetails.experienceTo,
       education: form.education,
       keywords: form.keywords,
-      salary_from: form.salary.from,
-      salary_to: form.salary.to,
+      salary_from: String(form.salary.from),
+      salary_to: String(form.salary.to),
       salary_currency: form.salary_currency,
       status: form.status,
       priority: form.priority,
-      experienceFrom: form.employmentDetails.experienceFrom,
-      experienceTo: form.employmentDetails.experienceTo,
       company: form.company,
       about_company: form.about_company,
+      notice_period: "30 days", // Default notice period
+      agency_id: agencyId,
     };
 
     try {
+      console.log("Submitting clone job payload:", payload);
       await axios.post(`${API_BASE_URL}/jobs/createJob`, payload);
       toast.success("Job cloned successfully.");
       onOpenChange(false);
@@ -431,9 +436,11 @@ export default function CloneJobModal({
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Draft">Draft</SelectItem>
-                      <SelectItem value="Published">Published</SelectItem>
-                      <SelectItem value="Closed">Closed</SelectItem>
+                      {jobStatuses.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -449,9 +456,11 @@ export default function CloneJobModal({
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Low">Low</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="High">High</SelectItem>
+                      {jobPriorities.map((priority) => (
+                        <SelectItem key={priority} value={priority}>
+                          {priority}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -775,19 +784,26 @@ export default function CloneJobModal({
                 ))}
               </div>
             </div>
-          </form>
-        </div>
 
-        <div className="p-6 pt-4 flex justify-end gap-3 border-t bg-gray-50 sticky bottom-0">
-          <DialogClose asChild>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              {loading ? "Posting..." : "Post Job"}
-            </Button>
-          </DialogClose>
+            {/* Submit Buttons inside form */}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                {loading ? "Posting..." : "Post Job"}
+              </Button>
+            </div>
+          </form>
         </div>
       </DialogContent>
     </Dialog>

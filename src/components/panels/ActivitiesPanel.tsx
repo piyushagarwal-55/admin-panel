@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +36,14 @@ export function ActivitiesPanel({ candidateId,reloadKey }: ActivitiesPanelProps)
   const [loading, setLoading] = useState<boolean>(false);
   const [activity, setActivity] = useState<Activity[]>([]);
 
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
+    // Don't fetch if candidateId is undefined or null
+    if (!candidateId) {
+      console.warn("ActivitiesPanel: candidateId is undefined, skipping API call");
+      setActivity([]);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await axios.get(
@@ -69,11 +76,11 @@ export function ActivitiesPanel({ candidateId,reloadKey }: ActivitiesPanelProps)
     } finally {
       setLoading(false);
     }
-  };
+  }, [candidateId]);
 
   useEffect(() => {
     fetchActivities();
-  }, [candidateId,reloadKey]);
+  }, [fetchActivities, reloadKey]);
 
   const grouped = useMemo(() => {
     return activity.reduce<Record<string, Activity[]>>((acc, act) => {
@@ -85,6 +92,15 @@ export function ActivitiesPanel({ candidateId,reloadKey }: ActivitiesPanelProps)
   }, [activity]);
 
   const totalCount = activity.length;
+
+  // Don't render if candidateId is not provided
+  if (!candidateId) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        <p>No candidate selected</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-1">

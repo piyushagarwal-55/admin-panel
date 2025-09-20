@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverTrigger,
@@ -27,6 +29,25 @@ interface ActivityPanelProps {
 export function ActivityPanel({ candidate }: ActivityPanelProps) {
   const activityDate = parseISO("2025-06-26");
   const activityTime = "15:42";
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [templates, setTemplates] = useState<{ id: string; template_name: string; subject: string; body: string }[]>([]);
+  const [notes, setNotes] = useState<string>("");
+
+  const fetchTemplates = async () => {
+    try {
+      const res = await fetch("http://16.171.117.2:3000/settings/getAllTemplates");
+      const data = await res.json();
+      const result = data.result;
+      const activityTemplates = result.filter((tpl: { template_type: string }) => tpl.template_type === "activity");
+      setTemplates(activityTemplates);
+    } catch (error) {
+      console.error("Failed to fetch activity templates:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
 
   return (
     <div className="space-y-4 p-6 bg-white rounded-lg shadow mb-4">
@@ -75,8 +96,16 @@ export function ActivityPanel({ candidate }: ActivityPanelProps) {
         <div className="text-sm capitalize">{candidate.first_name}</div>
       </div>
 
-      <div className="h-8 border border-gray-200 rounded flex items-center px-2 text-gray-400 text-sm">
-        [ Rich-text toolbar here ]
+      <div className="space-y-2">
+        <div className="text-xs font-medium text-gray-500 uppercase">
+          Activity Notes
+        </div>
+        <Textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Enter activity notes..."
+          className="min-h-[100px]"
+        />
       </div>
 
       <div className="space-y-2">
@@ -93,13 +122,24 @@ export function ActivityPanel({ candidate }: ActivityPanelProps) {
       </div>
 
       <div className="flex items-center justify-between">
-        <Select defaultValue="">
+        <Select value={selectedTemplate} onValueChange={(value) => {
+          setSelectedTemplate(value);
+          const tpl = templates.find((t) => String(t.id) === String(value));
+          if (tpl) {
+            // Replace placeholders like {candidate} with actual name
+            const replacedBody = tpl.body?.replace(/{candidate}/g, candidate.first_name);
+            setNotes(replacedBody || "");
+          }
+        }}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Select template" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="tmpl1">Template 1</SelectItem>
-            <SelectItem value="tmpl2">Template 2</SelectItem>
+            {templates.map((template) => (
+              <SelectItem key={template.id} value={template.id}>
+                {template.template_name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Button className="bg-blue-600 text-white">Save</Button>

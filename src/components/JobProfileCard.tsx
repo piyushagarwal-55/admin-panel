@@ -18,10 +18,49 @@ import {
   Edit2,
 } from "lucide-react";
 import EditJobModal from "./modals/EditJobModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-export default function JobProfileCard({ job }) {
+const API_BASE_URL = "http://16.171.117.2:3000";
+
+export default function JobProfileCard({ job: initialJob }) {
   const [openJobModal, setOpenJobModal] = useState(false);
+  const [job, setJob] = useState(initialJob);
+  const [loading, setLoading] = useState(false);
+
+  // Function to refetch job data
+  const fetchJobData = async () => {
+    if (!initialJob?.id) return;
+    
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_BASE_URL}/jobs/${initialJob.id}`);
+      // Handle both single job response and array response
+      if (response.data?.result) {
+        const jobData = Array.isArray(response.data.result) 
+          ? response.data.result[0] 
+          : response.data.result;
+        if (jobData) {
+          setJob(jobData);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch updated job data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update job state when prop changes
+  useEffect(() => {
+    setJob(initialJob);
+  }, [initialJob]);
+
+  // Handle job update success
+  const handleJobUpdate = async () => {
+    setOpenJobModal(false);
+    await fetchJobData(); // Refetch the latest job data
+  };
 
   if (!job) {
     return (
@@ -186,7 +225,7 @@ export default function JobProfileCard({ job }) {
         open={openJobModal}
         onOpenChange={setOpenJobModal}
         jobId={job.id}
-        onSuccess={() => {}}
+        onSuccess={handleJobUpdate}
       />
     </div>
   );
